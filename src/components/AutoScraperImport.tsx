@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { X, Globe, Save, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { CATEGORY_GROUPS } from '@/constants/categories'
+import CategorySelect from '@/components/CategorySelect'
 
 interface AutoScraperImportProps {
   onClose: () => void;
@@ -122,19 +124,11 @@ export default function AutoScraperImport({ onClose, onSuccess }: AutoScraperImp
              <div className="space-y-4">
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-700">Pilih Kategori Produk</label>
-                    <select 
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 outline-none transition-all font-bold text-gray-700"
-                    >
-                        <option value="">-- Pilih Kategori --</option>
-                        <option value="Fashion">Fashion</option>
-                        <option value="Baju">Baju</option>
-                        <option value="Celana">Celana</option>
-                        <option value="Aksesoris">Aksesoris</option>
-                        <option value="Elektronik">Elektronik</option>
-                        <option value="Rumah Tangga">Rumah Tangga</option>
-                    </select>
+                    <CategorySelect 
+                        value={category} 
+                        onChange={val => setCategory(val)} 
+                        placeholder="-- Pilih Kategori --"
+                    />
                 </div>
                 <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-700">Daftar Link Affiliate Shopee</label>

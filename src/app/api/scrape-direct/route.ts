@@ -8,8 +8,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Format link tidak valid' }, { status: 400 })
     }
 
-    // Panggil server Python lokal
-    const pythonResponse = await fetch('http://127.0.0.1:8000/import', {
+    // Panggil server Python (Lokal atau Ter-hosting)
+    const scraperUrl = process.env.SCRAPER_URL || 'http://127.0.0.1:8000'
+    const pythonResponse = await fetch(`${scraperUrl}/import`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ links }),

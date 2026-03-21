@@ -8,6 +8,8 @@ import { Download, Upload, FileSpreadsheet, Image as ImageIcon, CheckCircle2, Al
 import { downloadImportTemplate } from '@/lib/exportTemplate'
 import { useRouter } from 'next/navigation'
 import { generateShopeeAffiliateLink } from '@/lib/affiliate'
+import { CATEGORY_GROUPS } from '@/constants/categories'
+import CategorySelect from '@/components/CategorySelect'
 
 interface BulkImportProps {
   onClose: () => void;
@@ -232,19 +234,11 @@ export default function BulkImport({ onClose, onSuccess }: BulkImportProps) {
                 <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs">1</span>
                 Pilih Kategori (Bulk)
               </h3>
-              <select 
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-primary/20 bg-white focus:border-primary outline-none text-sm font-bold text-gray-700"
-              >
-                <option value="">-- Gunakan Kategori dari Excel (Default) --</option>
-                <option value="Fashion">Fashion</option>
-                <option value="Baju">Baju</option>
-                <option value="Celana">Celana</option>
-                <option value="Aksesoris">Aksesoris</option>
-                <option value="Elektronik">Elektronik</option>
-                <option value="Rumah Tangga">Rumah Tangga</option>
-              </select>
+              <CategorySelect 
+                value={selectedCategory} 
+                onChange={val => setSelectedCategory(val)} 
+                placeholder="-- Gunakan Kategori dari Excel (Default) --"
+              />
             </div>
             <hr className="border-orange-100" />
             <div>

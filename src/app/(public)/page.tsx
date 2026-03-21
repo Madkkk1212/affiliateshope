@@ -2,20 +2,23 @@ import { createClient } from '@/lib/supabase/server'
 import ProductCard from '@/components/ProductCard'
 import { Sparkles, TrendingUp, Filter } from 'lucide-react'
 import Link from 'next/link'
+import Pagination from '@/components/Pagination'
 
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; sort?: string }>
+  searchParams: Promise<{ category?: string; sort?: string; page?: string }>
 }) {
-  const { category, sort } = await searchParams
+  const { category, sort, page: pageStr } = await searchParams
+  const page = parseInt(pageStr || '1')
+  const pageSize = 12 // Using 12 for grid alignment (2, 3, 4 cols)
   const supabase = await createClient()
   
   let query = supabase
     .from('products')
-    .select('*')
+    .select('*', { count: 'exact' })
     .eq('is_active', true)
 
   if (category) {
@@ -28,14 +31,25 @@ export default async function HomePage({
     query = query.order('created_at', { ascending: false })
   }
 
-  const { data: products } = await query
+  // Apply pagination at the very end
+  query = query.range((page - 1) * pageSize, page * pageSize - 1)
 
-  const { data: categories } = await supabase
+  const { data: products, count } = await query
+
+  const { data: allActiveProducts } = await supabase
     .from('products')
     .select('category')
     .eq('is_active', true)
-    // Manually filter unique categories
-  const uniqueCategories = Array.from(new Set(categories?.map(c => c.category).filter(Boolean)))
+
+  const categoryCounts: Record<string, number> = {}
+  allActiveProducts?.forEach(p => {
+    if (p.category) {
+      categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1
+    }
+  })
+
+  const uniqueCategories = Object.keys(categoryCounts).sort()
+  const totalActive = allActiveProducts?.length || 0
 
   return (
     <div className="container mx-auto px-4 py-8 sm:py-12">
@@ -58,17 +72,23 @@ export default async function HomePage({
         <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 hide-scrollbar">
           <Link 
             href="/"
-            className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${!category ? 'bg-primary text-white' : 'bg-white text-gray-600 border border-gray-100'}`}
+            className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-2 ${!category ? 'bg-primary text-white' : 'bg-white text-gray-600 border border-gray-100'}`}
           >
-            Semua
+            <span>Semua</span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${!category ? 'bg-white/20' : 'bg-gray-100 text-gray-400'}`}>
+              {totalActive}
+            </span>
           </Link>
           {uniqueCategories.map((cat) => (
             <Link 
-              key={cat as string}
-              href={`/?category=${cat}`}
-              className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${category === cat ? 'bg-primary text-white' : 'bg-white text-gray-600 border border-gray-100'}`}
+              key={cat}
+              href={`/?category=${encodeURIComponent(cat)}`}
+              className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-2 ${category === cat ? 'bg-primary text-white' : 'bg-white text-gray-600 border border-gray-100'}`}
             >
-              {cat as string}
+              <span>{cat}</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${category === cat ? 'bg-white/20' : 'bg-gray-100 text-gray-400'}`}>
+                {categoryCounts[cat]}
+              </span>
             </Link>
           ))}
         </div>
@@ -89,11 +109,19 @@ export default async function HomePage({
 
       {/* Product Grid */}
       {products && products.length > 0 ? (
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-12">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+          
+          <Pagination 
+            currentPage={page} 
+            totalCount={count || 0} 
+            pageSize={pageSize} 
+          />
+        </>
       ) : (
         <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-100">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white shadow-sm mb-4">

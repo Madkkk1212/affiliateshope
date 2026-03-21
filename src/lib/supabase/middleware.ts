@@ -39,9 +39,22 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Hidden Admin Path Protection
+  const adminPath = process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'
+  
+  // Block legacy /studio path
   if (request.nextUrl.pathname.startsWith('/studio')) {
+    return NextResponse.rewrite(new URL('/not-found', request.url))
+  }
+
+  if (request.nextUrl.pathname.startsWith(`/${adminPath}`)) {
+    const loginSecret = process.env.NEXT_PUBLIC_LOGIN_PATH || 'y7z2k9'
+    const dashboardSecret = process.env.NEXT_PUBLIC_DASHBOARD_PATH || 'm4n5b6'
+    
+    const loginPath = `/${adminPath}/${loginSecret}`
+    const dashboardPath = `/${adminPath}/${dashboardSecret}`
+
     // Allow access to login page
-    if (request.nextUrl.pathname === '/studio/login') {
+    if (request.nextUrl.pathname === loginPath) {
       // If already logged in as admin, go to dashboard
       if (user) {
         const { data: profile } = await supabase
@@ -51,14 +64,14 @@ export async function updateSession(request: NextRequest) {
           .single()
         
         if (profile?.role === 'admin') {
-          return NextResponse.redirect(new URL('/studio/dashboard', request.url))
+          return NextResponse.redirect(new URL(dashboardPath, request.url))
         }
       }
       return supabaseResponse
     }
 
     if (!user) {
-      return NextResponse.redirect(new URL('/studio/login', request.url))
+      return NextResponse.redirect(new URL(loginPath, request.url))
     }
 
     const { data: profile } = await supabase
@@ -71,9 +84,9 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(new URL('/', request.url))
     }
 
-    // Redirect /studio to /studio/dashboard
-    if (request.nextUrl.pathname === '/studio') {
-      return NextResponse.redirect(new URL('/studio/dashboard', request.url))
+    // Redirect /adminPath (root) to /adminPath/dashboard
+    if (request.nextUrl.pathname === `/${adminPath}`) {
+      return NextResponse.redirect(new URL(dashboardPath, request.url))
     }
   }
 

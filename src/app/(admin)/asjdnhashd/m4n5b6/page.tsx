@@ -28,7 +28,7 @@ export default async function StudioDashboard() {
           <h1 className="text-3xl font-black text-gray-900">Dashboard</h1>
           <p className="text-gray-500">Selamat datang kembali, Admin.</p>
         </div>
-        <Link href="/studio/products/new" className="btn-primary flex items-center gap-2 w-fit">
+        <Link href={`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/products/new`} className="btn-primary flex items-center gap-2 w-fit">
           <Plus size={20} />
           <span>Tambah Produk</span>
         </Link>
@@ -63,7 +63,7 @@ export default async function StudioDashboard() {
       <div className="bg-white rounded-3xl shadow-premium border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-50 flex items-center justify-between">
           <h2 className="font-bold text-gray-900">Produk Terbaru</h2>
-          <Link href="/studio/products" className="text-sm font-bold text-primary hover:underline">
+          <Link href={`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/products`} className="text-sm font-bold text-primary hover:underline">
             Lihat Semua
           </Link>
         </div>
@@ -96,7 +96,7 @@ export default async function StudioDashboard() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <Link 
-                      href={`/studio/products/${product.id}/edit`} 
+                      href={`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/products/${product.id}/edit`} 
                       className="inline-flex items-center gap-1 text-accent font-bold hover:text-primary transition-colors"
                     >
                       Edit <ArrowUpRight size={14} />

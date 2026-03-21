@@ -9,6 +9,8 @@ import { Save, Loader2, ArrowLeft, Trash2, Globe, Plus, X } from 'lucide-react'
 import toast, { Toaster } from 'react-hot-toast'
 import Link from 'next/link'
 import { saveProduct, deleteProduct } from '@/app/actions/product'
+import { CATEGORY_GROUPS } from '@/constants/categories'
+import CategorySelect from '@/components/CategorySelect'
 
 interface ProductFormProps {
   initialData?: Product
@@ -73,12 +75,14 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         throw new Error(res.error)
       }
 
+      const adminPath = process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'
+      const dashboardSecret = process.env.NEXT_PUBLIC_DASHBOARD_PATH || 'm4n5b6'
       if (initialData?.id) {
         toast.success('Produk diperbarui!')
-        router.push('/studio/dashboard')
+        router.push(`/${adminPath}/${dashboardSecret}`)
       } else {
         toast.success('Produk dibuat!')
-        router.push('/studio/dashboard')
+        router.push(`/${adminPath}/${dashboardSecret}`)
       }
       router.refresh()
     } catch (error) {
@@ -98,7 +102,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       if (!res.success) throw new Error(res.error)
       
       toast.success('Produk dihapus!')
-      router.push('/studio/products')
+      const adminPath = process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'
+      const productsSecret = process.env.NEXT_PUBLIC_PRODUCTS_PATH || 'p1o2i3'
+      router.push(`/${adminPath}/${productsSecret}`)
       router.refresh()
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Terjadi kesalahan'
@@ -111,7 +117,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     <div className="max-w-4xl mx-auto py-10 px-6">
       <Toaster />
       <div className="flex items-center justify-between mb-8">
-        <Link href="/studio/products" className="inline-flex items-center gap-2 text-gray-500 font-bold hover:text-accent transition-colors">
+        <Link href={`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/${process.env.NEXT_PUBLIC_PRODUCTS_PATH || 'p1o2i3'}`} className="inline-flex items-center gap-2 text-gray-500 font-bold hover:text-accent transition-colors">
           <ArrowLeft size={20} />
           <span>Kembali ke Daftar</span>
         </Link>
@@ -254,17 +260,10 @@ export default function ProductForm({ initialData }: ProductFormProps) {
             
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-700">Kategori</label>
-              <select
-                value={formData.category || ''}
-                onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all appearance-none"
-              >
-                <option value="">Pilih Kategori</option>
-                <option value="Fashion">Fashion</option>
-                <option value="Electro">Electro</option>
-                <option value="Home">Home</option>
-                <option value="Health">Health</option>
-              </select>
+              <CategorySelect 
+                value={formData.category || ''} 
+                onChange={val => setFormData(prev => ({ ...prev, category: val }))} 
+              />
             </div>
           </div>
 

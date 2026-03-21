@@ -15,8 +15,9 @@ export async function saveProduct(data: any, id?: string) {
       if (error) throw error
     }
 
-    revalidatePath('/studio/products')
-    revalidatePath('/studio/dashboard')
+    const adminSecret = process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'
+    revalidatePath(`/${adminSecret}/products`)
+    revalidatePath(`/${adminSecret}/dashboard`)
     revalidatePath('/')
     
     return { success: true }
@@ -32,8 +33,9 @@ export async function deleteProduct(id: string) {
     const { error } = await supabase.from('products').delete().eq('id', id)
     if (error) throw error
 
-    revalidatePath('/studio/products')
-    revalidatePath('/studio/dashboard')
+    const adminSecret = process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'
+    revalidatePath(`/${adminSecret}/products`)
+    revalidatePath(`/${adminSecret}/dashboard`)
     revalidatePath('/')
     
     return { success: true }

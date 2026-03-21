@@ -2,27 +2,42 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutGrid, Package, Settings, LogOut } from 'lucide-react'
+import { LayoutGrid, Package, Settings, LogOut, Anchor } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
-export default function Sidebar() {
-  const pathname = usePathname()
+export function useSidebarData() {
   const router = useRouter()
   const supabase = createClient()
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push('/studio/login')
+    const adminPath = process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'
+    const loginSecret = process.env.NEXT_PUBLIC_LOGIN_PATH || 'y7z2k9'
+    router.push(`/${adminPath}/${loginSecret}`)
     router.refresh()
   }
 
+  const adminPath = process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'
+  const dashboardSecret = process.env.NEXT_PUBLIC_DASHBOARD_PATH || 'm4n5b6'
+  const productsSecret = process.env.NEXT_PUBLIC_PRODUCTS_PATH || 'p1o2i3'
+  const settingsSecret = process.env.NEXT_PUBLIC_SETTINGS_PATH || 's4d5f6'
+  const hooksSecret = process.env.NEXT_PUBLIC_HOOKS_PATH || 'h7o8o9'
+
   const menuItems = [
-    { title: 'Dashboard', icon: LayoutGrid, href: '/studio/dashboard' },
-    { title: 'Semua Produk', icon: Package, href: '/studio/products' },
-    { title: 'Pengaturan', icon: Settings, href: '/studio/settings' },
+    { title: 'Dashboard', icon: LayoutGrid, href: `/${adminPath}/${dashboardSecret}` },
+    { title: 'Hook Manager', icon: Anchor, href: `/${adminPath}/${hooksSecret}` },
+    { title: 'Semua Produk', icon: Package, href: `/${adminPath}/${productsSecret}` },
+    { title: 'Pengaturan', icon: Settings, href: `/${adminPath}/${settingsSecret}` },
   ]
+
+  return { menuItems, handleLogout }
+}
+
+export default function Sidebar() {
+  const pathname = usePathname()
+  const { menuItems, handleLogout } = useSidebarData()
 
   return (
     <aside className="w-64 bg-white border-r border-gray-100 hidden lg:flex flex-col h-screen sticky top-0">

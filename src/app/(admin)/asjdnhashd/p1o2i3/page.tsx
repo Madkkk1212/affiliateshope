@@ -6,19 +6,49 @@ import { redirect } from 'next/navigation'
 import ImportButton from '@/components/ImportButton'
 import AutoScraperButton from '@/components/AutoScraperButton'
 import ProductStatusToggle from '@/components/ProductStatusToggle'
+import CategoryFilter from '@/components/CategoryFilter'
+import Pagination from '@/components/Pagination'
 
 export const dynamic = 'force-dynamic'
 
-export default async function ProductListPage() {
+export default async function ProductListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string; page?: string }>
+}) {
+  const { category, page: pageStr } = await searchParams
+  const page = parseInt(pageStr || '1')
+  const pageSize = 10
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: products } = await supabase
+  let query = supabase
     .from('products')
-    .select('*')
+    .select('*', { count: 'exact' })
     .order('created_at', { ascending: false })
+
+  if (category) {
+    query = query.eq('category', category)
+  }
+
+  // Apply pagination at the very end
+  query = query.range((page - 1) * pageSize, page * pageSize - 1)
+
+  const { data: products, count } = await query
+
+  // Fetch all product categories for counts
+  const { data: allProducts } = await supabase
+    .from('products')
+    .select('category')
+
+  const categoryCounts: Record<string, number> = {}
+  allProducts?.forEach(p => {
+    if (p.category) {
+      categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1
+    }
+  })
 
   return (
     <div className="p-6 lg:p-10">
@@ -27,10 +57,12 @@ export default async function ProductListPage() {
           <h1 className="text-3xl font-black text-gray-900">Semua Produk</h1>
           <p className="text-gray-500">Kelola daftar tautan affiliate Anda.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
+          <CategoryFilter categoryCounts={categoryCounts} />
+          <div className="h-10 w-px bg-gray-100 mx-2" />
           <AutoScraperButton />
           <ImportButton />
-          <Link href="/studio/products/new" className="btn-primary flex items-center gap-2 w-fit">
+          <Link href={`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/products/new`} className="btn-primary flex items-center gap-2 w-fit">
             <Plus size={20} />
             <span>Produk Baru</span>
           </Link>
@@ -83,7 +115,7 @@ export default async function ProductListPage() {
                   </td>
                   <td className="px-6 py-4 text-right text-accent font-bold">
                     <div className="flex justify-end gap-3">
-                      <Link href={`/studio/products/${product.id}/edit`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Edit">
+                      <Link href={`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/products/${product.id}/edit`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Edit">
                         <Edit3 size={18} />
                       </Link>
                       <Link href={`/${product.slug}`} target="_blank" className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="View Public">
@@ -104,6 +136,12 @@ export default async function ProductListPage() {
           </table>
         </div>
       </div>
+
+      <Pagination 
+        currentPage={page} 
+        totalCount={count || 0} 
+        pageSize={pageSize} 
+      />
     </div>
   )
 }

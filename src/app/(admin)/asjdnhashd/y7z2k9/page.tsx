@@ -29,7 +29,7 @@ export default function LoginPage() {
     }
 
     toast.success('Login berhasil! Mengalihkan...')
-    router.push('/studio/dashboard')
+    router.push(`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/dashboard`)
     router.refresh()
   }
 

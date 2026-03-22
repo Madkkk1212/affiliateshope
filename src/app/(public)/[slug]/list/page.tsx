@@ -32,7 +32,16 @@ export default async function HookProductListPage({ params }: { params: Promise<
     .filter(Boolean) || []
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-20">
+    <div className="bg-gray-50 min-h-screen pb-20 relative overflow-hidden">
+      {/* Background Watermark */}
+      <div className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center opacity-10 mix-blend-multiply overflow-hidden">
+        <img 
+          src="/logo.png" 
+          alt="Luma Hive Watermark" 
+          className="w-[120%] sm:w-[80%] max-w-[1000px] object-contain rotate-[-5deg] grayscale"
+        />
+      </div>
+
       {/* Header */}
       <div className="bg-white border-b border-gray-100 sticky top-0 z-10">
         <div className="container mx-auto px-4 h-20 flex items-center gap-4">

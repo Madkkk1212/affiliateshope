@@ -1,17 +1,19 @@
 import { createClient } from '@/lib/supabase/server'
 import ProductCard from '@/components/ProductCard'
-import { Sparkles, TrendingUp, Filter } from 'lucide-react'
+import { Sparkles, TrendingUp, Filter, CheckCircle2, ShieldCheck, Star } from 'lucide-react'
 import Link from 'next/link'
 import Pagination from '@/components/Pagination'
+import CategoryNav from '@/components/CategoryNav'
+import HeroSearch from '@/components/HeroSearch'
 
 export const revalidate = 3600 // Cache for 1 hour
 
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; sort?: string; page?: string }>
+  searchParams: Promise<{ category?: string; sort?: string; page?: string; q?: string }>
 }) {
-  const { category, sort, page: pageStr } = await searchParams
+  const { category, sort, page: pageStr, q: searchStr } = await searchParams
   const page = parseInt(pageStr || '1')
   const pageSize = 12
   const supabase = await createClient()
@@ -23,6 +25,14 @@ export default async function HomePage({
 
   if (category) {
     query = query.eq('category', category)
+  }
+
+  if (searchStr) {
+    // Memecah kata kunci berdasarkan spasi agar pencarian lebih fleksibel (misal: "makaroni pedas" mencari "makaroni" AND "pedas" di posisi mana saja)
+    const keywords = searchStr.trim().split(/\s+/)
+    keywords.forEach(keyword => {
+      query = query.ilike('title', `%${keyword}%`)
+    })
   }
 
   if (sort === 'popular') {
@@ -38,13 +48,18 @@ export default async function HomePage({
   // Optimize category counting: only fetch what's needed
   const { data: allActiveCategories } = await supabase
     .from('products')
-    .select('category')
+    .select('category, image')
     .eq('is_active', true)
 
   const categoryCounts: Record<string, number> = {}
+  const categoryImages: Record<string, string> = {}
+  
   allActiveCategories?.forEach(p => {
     if (p.category) {
       categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1
+      if (!categoryImages[p.category] && p.image) {
+        categoryImages[p.category] = p.image
+      }
     }
   })
 
@@ -52,85 +67,164 @@ export default async function HomePage({
   const totalActive = allActiveCategories?.length || 0
 
   return (
-    <div className="bg-hero-gradient min-h-screen">
-      <div className="container mx-auto px-4 py-12 sm:py-20">
-        {/* Hero Section */}
-        <section className="mb-16 text-center max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 text-primary text-xs font-bold mb-8 border border-primary/10 animate-fade-in">
-            <Sparkles size={14} />
-            <span className="uppercase tracking-widest">Premium Curation</span>
-          </div>
-          <h1 className="text-4xl sm:text-6xl font-black text-gray-900 tracking-tight mb-6 leading-[1.1] text-balance">
-            Temukan <span className="text-primary italic">Produk Pilihan</span> <br className="hidden sm:block" /> Untuk Gaya Hidup Anda
-          </h1>
-          <p className="text-gray-500 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed text-balance">
-            Koleksi produk berkualitas tinggi yang telah dikurasi khusus untuk Anda. Hemat waktu dengan rekomendasi dari expert kami.
-          </p>
-        </section>
+    <div className="bg-hero-gradient min-h-screen relative">
+      {/* Background Watermark */}
+      <div className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center opacity-10 mix-blend-multiply overflow-hidden">
+        <img 
+          src="/logo.png" 
+          alt="Luma Hive Watermark" 
+          className="w-[120%] sm:w-[80%] max-w-[1000px] object-contain rotate-[-5deg] grayscale"
+        />
+      </div>
 
-        {/* Filters & Sorting */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12">
-          <div className="flex items-center gap-3 overflow-x-auto pb-4 lg:pb-0 hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-            <Link 
-              href="/"
-              className={`px-5 py-2.5 rounded-2xl text-sm font-bold whitespace-nowrap transition-all duration-300 flex items-center gap-2.5 ${!category ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white text-gray-600 border border-gray-100 hover:border-primary/30 hover:shadow-soft'}`}
-            >
-              <span>Semua</span>
-              <span className={`text-[10px] px-2 py-0.5 rounded-lg ${!category ? 'bg-white/20' : 'bg-gray-100 text-gray-400 font-medium'}`}>
-                {totalActive}
-              </span>
-            </Link>
-            {uniqueCategories.map((cat) => (
-              <Link 
-                key={cat}
-                href={`/?category=${encodeURIComponent(cat)}`}
-                className={`px-5 py-2.5 rounded-2xl text-sm font-bold whitespace-nowrap transition-all duration-300 flex items-center gap-2.5 ${category === cat ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white text-gray-600 border border-gray-100 hover:border-primary/30 hover:shadow-soft'}`}
-              >
-                <span>{cat}</span>
-                <span className={`text-[10px] px-2 py-0.5 rounded-lg ${category === cat ? 'bg-white/20' : 'bg-gray-100 text-gray-400 font-medium'}`}>
-                  {categoryCounts[cat]}
-                </span>
-              </Link>
-            ))}
+      <div className="container mx-auto px-4 py-12 sm:py-20 relative z-10">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start mb-16">
+          {/* Sidebar (Desktop Only) */}
+          <div className="hidden lg:block w-full lg:w-[280px] xl:w-[320px] shrink-0 lg:sticky lg:top-28 z-10 transition-all duration-500">
+            <CategoryNav 
+              uniqueCategories={uniqueCategories}
+              categoryCounts={categoryCounts}
+              categoryImages={categoryImages}
+              totalActive={totalActive}
+              currentCategory={category}
+              currentSort={sort}
+            />
           </div>
 
-          <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-gray-100 shadow-soft self-start lg:self-auto">
-            <TrendingUp size={16} className="text-primary" />
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Urutkan</span>
-            <select 
-              className="bg-transparent text-sm font-black text-gray-900 focus:outline-none cursor-pointer pr-2"
-              defaultValue={sort || 'latest'}
-            >
-              <option value="latest">Terbaru</option>
-              <option value="popular">Terpopuler</option>
-            </select>
+          {/* Main Content */}
+          <div className="flex-1 min-w-0 w-full transition-all duration-500">
+            {/* Hero Section */}
+            <section className="mb-12 lg:mb-16 mt-4 lg:mt-0 lg:pr-8 flex flex-col lg:flex-row items-center gap-8 lg:gap-12 relative z-0">
+              <div className="flex-1 text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-50/80 border border-orange-200 text-orange-600 text-xs font-bold mb-6 lg:mb-8 animate-fade-in shadow-sm">
+                  <Sparkles size={16} className="text-orange-500 animate-pulse" />
+                  <span className="uppercase tracking-widest">Terpercaya & Terkurasi 100%</span>
+                </div>
+                
+                <h1 className="text-4xl sm:text-5xl xl:text-[3.6rem] font-black tracking-tight mb-5 lg:mb-7 leading-[1.12] text-balance">
+                  Belanja Cerdas Tepat Sasaran, <br className="hidden lg:block" />
+                  <span className="text-orange-600">Hemat Waktu & Uang Anda.</span>
+                </h1>
+                
+                <p className="text-gray-600 text-base sm:text-lg xl:text-xl max-w-2xl mx-auto lg:mx-0 leading-relaxed text-balance mb-10">
+                  Berhenti pusing memilih dari ribuan barang online. Kami menyeleksi ketat produk dengan rating tertinggi dan harga paling masuk akal khusus untuk Anda. <strong className="text-gray-900 font-bold">Biar kami yang repot mencari, Anda tinggal pilih yang pasti-pasti aja.</strong>
+                </p>
+
+                {/* CTA Button */}
+                <div className="flex justify-center lg:justify-start mb-10">
+                  <a 
+                    href="#product-grid" 
+                    className="inline-block bg-orange-600 hover:bg-orange-700 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg shadow-orange-600/30 transform hover:-translate-y-1 transition-all"
+                  >
+                    Yuk, Intip Koleksinya
+                  </a>
+                </div>
+
+                {/* Trust Indicators - Unified Pill */}
+                <div className="inline-flex flex-wrap items-center justify-center lg:justify-start gap-6 sm:gap-8 text-sm font-bold text-gray-700 bg-white/60 backdrop-blur-md px-6 py-4 rounded-full border border-gray-200 shadow-sm mx-auto lg:mx-0">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-green-100/80 text-green-600 p-1.5 rounded-full">
+                      <CheckCircle2 size={16} />
+                    </div>
+                    <span>Kualitas Teruji</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="bg-blue-100/80 text-blue-600 p-1.5 rounded-full">
+                      <Star size={16} />
+                    </div>
+                    <span>Rating Tertinggi</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="bg-orange-100/80 text-orange-600 p-1.5 rounded-full">
+                      <ShieldCheck size={16} />
+                    </div>
+                    <span>Belanja Aman</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cool Aesthetic Image on the Right - Bento Grid */}
+              <div className="hidden lg:block w-full lg:w-[45%] relative">
+                {/* Decorative blob behind bento */}
+                <div className="absolute -inset-4 bg-gradient-to-tr from-gray-200 to-primary/10 opacity-50 blur-3xl rounded-full -z-10 animate-pulse"></div>
+                
+                <div className="relative w-full aspect-square xl:aspect-[4/3] rounded-[2rem] p-3 bg-white/40 backdrop-blur-xl border border-white/60 shadow-2xl shadow-gray-300/40">
+                  <div className="grid grid-cols-2 grid-rows-2 gap-3 h-full w-full">
+                    {/* Top Left: Tech / Keyboard */}
+                    <div className="rounded-2xl overflow-hidden bg-gray-900 group relative shadow-inner">
+                      <img 
+                        src="https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=800&auto=format&fit=crop" 
+                        alt="Tech" 
+                        className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110 opacity-90 group-hover:opacity-100" 
+                      />
+                    </div>
+                    {/* Top Right: Shoes */}
+                    <div className="rounded-2xl overflow-hidden bg-gray-100 group relative shadow-inner">
+                      <img 
+                        src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=800&auto=format&fit=crop" 
+                        alt="Shoes" 
+                        className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" 
+                      />
+                    </div>
+                    {/* Bottom Left: Perfume */}
+                    <div className="rounded-2xl overflow-hidden bg-gray-100 group relative shadow-inner">
+                      <img 
+                        src="https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=800&auto=format&fit=crop" 
+                        alt="Perfume" 
+                        className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" 
+                      />
+                    </div>
+                    {/* Bottom Right: EDC */}
+                    <div className="rounded-2xl overflow-hidden bg-gray-100 group relative shadow-inner">
+                      <img 
+                        src="https://images.unsplash.com/photo-1585336261022-680e295ce3fe?q=80&w=800&auto=format&fit=crop" 
+                        alt="Accessories" 
+                        className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" 
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Mobile Sidebar (CategoryNav) */}
+            <div className="block lg:hidden w-full shrink-0 z-10 transition-all duration-500 mb-8 sm:mb-12">
+              <CategoryNav 
+                uniqueCategories={uniqueCategories}
+                categoryCounts={categoryCounts}
+                categoryImages={categoryImages}
+                totalActive={totalActive}
+                currentCategory={category}
+                currentSort={sort}
+              />
+            </div>
+
+            {/* Product Grid */}
+            {products && products.length > 0 ? (
+              <>
+                <div id="product-grid" key={category || 'all'} className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-8 mb-16 animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out fill-mode-both">
+                  {products.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+                
+                <Pagination 
+                  currentPage={page} 
+                  totalCount={count || 0} 
+                  pageSize={pageSize} 
+                />
+              </>
+            ) : (
+              <div className="text-center py-24 bg-white rounded-[2rem] border border-gray-100 shadow-soft w-full">
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gray-50 mb-6 transition-transform hover:scale-110 duration-300">
+                  <Filter size={40} className="text-gray-200" />
+                </div>
+                <h3 className="text-xl font-black text-gray-900 mb-2">Belum Ada Produk</h3>
+                <p className="text-gray-400 max-w-xs mx-auto">Kami sedang menyiapkan produk menarik untuk kategori ini. Kembali lagi nanti ya!</p>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Product Grid */}
-        {products && products.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 mb-16">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-            
-            <Pagination 
-              currentPage={page} 
-              totalCount={count || 0} 
-              pageSize={pageSize} 
-            />
-          </>
-        ) : (
-          <div className="text-center py-24 bg-white rounded-[2rem] border border-gray-100 shadow-soft">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gray-50 mb-6">
-              <Filter size={40} className="text-gray-200" />
-            </div>
-            <h3 className="text-xl font-black text-gray-900 mb-2">Belum Ada Produk</h3>
-            <p className="text-gray-400 max-w-xs mx-auto">Kami sedang menyiapkan produk menarik untuk kategori ini. Kembali lagi nanti ya!</p>
-          </div>
-        )}
       </div>
     </div>
   )

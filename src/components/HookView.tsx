@@ -141,6 +141,14 @@ export default function HookView({ hook }: HookViewProps) {
       className="relative min-h-screen transition-colors duration-500 overflow-hidden"
       style={{ backgroundColor: settings.pageBg || '#f9fafb', padding: '0px' }}
     >
+      {/* Background Watermark */}
+      <div className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center opacity-10 mix-blend-multiply overflow-hidden">
+        <img 
+          src="/logo.png" 
+          alt="Luma Hive Watermark" 
+          className="w-[120%] sm:w-[80%] max-w-[1000px] object-contain rotate-[-5deg] grayscale"
+        />
+      </div>
       {/* The Landing Popup (Hook Info as Popup with Product Collage) */}
       <HookPopup 
         popup={popupConfig} 

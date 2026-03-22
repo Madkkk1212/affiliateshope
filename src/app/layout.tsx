@@ -11,6 +11,9 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "Lumahive Rekomendasi | Temukan Produk Pilihan Terbaik",
   description: "Platform kurasi produk terbaik untuk kebutuhan gaya hidup Anda.",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({

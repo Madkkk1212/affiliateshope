@@ -9,6 +9,8 @@
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
 
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+
   --animate-spin-slow: spin 8s linear infinite;
 }
 
@@ -92,4 +94,54 @@ body {
 .goog-te-gadget .goog-te-combo {
   @apply bg-transparent border-none text-xs font-semibold text-gray-700 cursor-pointer;
   margin: 0 !important;
+}
+
+/* Google Translate Premium UI Overrides */
+.premium-translate-element {
+  height: 16px;
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .premium-translate-element { width: 40px; }
+}
+
+.goog-te-gadget-simple {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  font-family: inherit !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.goog-te-gadget-simple span {
+  color: #374151 !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+}
+
+.goog-te-gadget-icon,
+.goog-te-menu-value img,
+.goog-te-menu-value span:nth-child(3),
+.goog-te-menu-value span:nth-child(5) {
+  display: none !important;
+}
+
+/* Custom Premium Styles */
+.shadow-soft {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-premium {
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.02);
+}
+
+.bg-hero-gradient {
+  background: radial-gradient(circle at top right, rgba(255, 77, 0, 0.05) 0%, transparent 40%),
+              radial-gradient(circle at bottom left, rgba(255, 77, 0, 0.02) 0%, transparent 40%);
+}
+
+.text-balance {
+  text-wrap: balance;
 }

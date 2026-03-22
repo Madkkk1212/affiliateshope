@@ -31,7 +31,9 @@ class ScrapeResult(BaseModel):
 def normalize_price(price_text: str) -> int:
     try:
         clean = re.sub(r'[^0-9]', '', price_text)
-        return int(clean) if clean else 0
+        val = int(clean) if clean else 0
+        # Prevent Postgres BIGINT overflow (max ~9.2e18)
+        return val if val < 9000000000000000000 else 0
     except:
         return 0
 
@@ -61,7 +63,9 @@ async def extract_product_data(page, url):
             // Filter elemen yang mengandung "Rp" dan terlihat (bukan data tersembunyi)
             let rpElements = allElements.filter(el => {
                 const style = window.getComputedStyle(el);
-                return el.innerText.includes('Rp') && 
+                const text = el.innerText.trim();
+                return text.includes('Rp') && 
+                       text.length < 100 && // Hindari mengambil container raksasa dengan seluruh text page
                        style.display !== 'none' && 
                        style.visibility !== 'hidden' &&
                        !style.textDecoration.includes('line-through');
@@ -128,7 +132,7 @@ async def extract_product_data(page, url):
                 final_discount_price_raw = None
 
         # 3. EKSTRAKSI GAMBAR GALERI (Hanya galeri utama kiri)
-        images = []
+        images: List[str] = []
         # Ambil semua gambar yang memiliki pola link file Shopee
         # Biasanya di galeri utama, gambarnya punya format khusus
         img_elements = await page.query_selector_all('img')
@@ -148,7 +152,7 @@ async def extract_product_data(page, url):
         
         # Filter: Produk Shopee biasanya punya minimal 1-8 gambar di galeri utama
         # Kita ambil 10 pertama yang unik (menghindari gambar rekomendasi di bawah)
-        images = images[:10] 
+        images = [img for i, img in enumerate(images) if i < 10]
         main_image = images[0] if images else None
 
         return ScrapeResult(

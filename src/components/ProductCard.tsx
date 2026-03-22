@@ -28,7 +28,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleTrackClick}
-      className="group bg-white rounded-2xl overflow-hidden shadow-premium border border-gray-100 hover:border-primary/20 hover:shadow-2xl transition-all duration-300 flex flex-col h-full cursor-pointer no-underline"
+      className="group bg-white rounded-3xl overflow-hidden shadow-soft border border-gray-100 hover:border-primary/20 hover:shadow-premium transition-all duration-500 flex flex-col h-full cursor-pointer no-underline animate-fade-in"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
         {product.image ? (
@@ -36,58 +36,61 @@ export default function ProductCard({ product }: ProductCardProps) {
             src={product.image}
             alt={product.title}
             fill
-            className="object-cover group-hover:scale-110 transition-transform duration-700"
-            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+            priority={false}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
+          <div className="w-full h-full flex items-center justify-center text-gray-200">
             <ShoppingCart size={48} strokeWidth={1} />
           </div>
         )}
         
         {product.badge && (
-          <div className="absolute top-3 left-3 px-3 py-1 bg-primary text-white text-[10px] font-bold rounded-full shadow-sm z-10 uppercase tracking-tighter">
+          <div className="absolute top-4 left-4 px-3 py-1 bg-primary text-white text-[10px] font-black rounded-full shadow-lg shadow-primary/20 z-10 uppercase tracking-widest">
             {product.badge}
           </div>
         )}
 
-        {/* Pro Badge: Klik untuk beli */}
-        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <div className="bg-white/90 backdrop-blur-sm text-gray-900 px-4 py-2 rounded-full text-xs font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-            Klik untuk beli
+        {/* Hover Overlay */}
+        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+          <div className="bg-white/90 backdrop-blur-md text-gray-900 px-6 py-2.5 rounded-2xl text-xs font-black shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+            Lihat Produk
           </div>
         </div>
       </div>
 
-      <div className="p-4 flex flex-col flex-grow">
-        <div className="mb-2">
-          <span className="text-xs font-medium text-primary uppercase tracking-wider">
-            {product.category || 'Rekomendasi'}
-          </span>
-          <h3 className="text-gray-900 font-bold leading-tight line-clamp-2 mt-1 min-h-[2.5rem] group-hover:text-primary transition-colors">
+      <div className="p-5 flex flex-col flex-grow">
+        <div className="mb-3">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-lg">
+              {product.category || 'Pilihan'}
+            </span>
+          </div>
+          <h3 className="text-gray-900 font-bold leading-snug line-clamp-2 mt-1 min-h-[3rem] group-hover:text-primary transition-colors text-base sm:text-lg">
             {product.title}
           </h3>
         </div>
 
-        <div className="mt-auto flex items-center justify-between">
+        <div className="mt-auto pt-4 flex items-center justify-between border-t border-gray-50">
           <div className="flex flex-col">
             {product.discount_price ? (
               <>
-                <div className="text-xs text-gray-400 line-through font-medium">
+                <div className="text-xs text-gray-400 line-through font-bold mb-0.5 opacity-60">
                   {formatPrice(product.price || '0')}
                 </div>
-                <div className="text-lg font-bold text-primary">
+                <div className="text-xl font-black text-primary tracking-tight">
                   {formatPrice(product.discount_price)}
                 </div>
               </>
             ) : (
-              <div className="text-lg font-bold text-gray-900">
+              <div className="text-xl font-black text-gray-900 tracking-tight">
                 {formatPrice(product.price || '0')}
               </div>
             )}
           </div>
-          <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all transform group-hover:rotate-12">
-            <ArrowUpRight size={20} />
+          <div className="w-12 h-12 rounded-2xl bg-gray-50 text-gray-400 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300 transform group-hover:translate-x-1 group-hover:-translate-y-1 shadow-sm group-hover:shadow-lg group-hover:shadow-primary/30">
+            <ArrowUpRight size={22} strokeWidth={2.5} />
           </div>
         </div>
       </div>

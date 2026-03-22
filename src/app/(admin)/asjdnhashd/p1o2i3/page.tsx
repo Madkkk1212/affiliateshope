@@ -62,7 +62,7 @@ export default async function ProductListPage({
           <div className="h-10 w-px bg-gray-100 mx-2" />
           <AutoScraperButton />
           <ImportButton />
-          <Link href={`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/products/new`} className="btn-primary flex items-center gap-2 w-fit">
+          <Link href={`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/${process.env.NEXT_PUBLIC_PRODUCTS_PATH || 'p1o2i3'}/new`} className="btn-primary flex items-center gap-2 w-fit">
             <Plus size={20} />
             <span>Produk Baru</span>
           </Link>
@@ -115,7 +115,7 @@ export default async function ProductListPage({
                   </td>
                   <td className="px-6 py-4 text-right text-accent font-bold">
                     <div className="flex justify-end gap-3">
-                      <Link href={`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/products/${product.id}/edit`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Edit">
+                      <Link href={`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/${process.env.NEXT_PUBLIC_PRODUCTS_PATH || 'p1o2i3'}/${product.id}/edit`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Edit">
                         <Edit3 size={18} />
                       </Link>
                       <Link href={`/${product.slug}`} target="_blank" className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="View Public">

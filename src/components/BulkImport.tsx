@@ -152,10 +152,37 @@ export default function BulkImport({ onClose, onSuccess }: BulkImportProps) {
           }
         }
 
-        // ... (rest of image upload logic) ...
-        const expectedImageName = row.nama_file_foto?.toString().trim()
-        if (expectedImageName) {
-           // ... (existing upload code) ...
+        let expectedImageName = row.nama_file_foto?.toString().trim()
+        if (expectedImageName && imageFiles.length > 0) {
+           const matchingFile = imageFiles.find(f => f.name === expectedImageName)
+           if (matchingFile) {
+               setProgress(prev => ({ ...prev, message: `Mengkompres foto untuk baris ke-${rowIndex}...` }))
+               try {
+                  const options = {
+                    maxSizeMB: 2,
+                    maxWidthOrHeight: 1200,
+                    useWebWorker: true,
+                  }
+                  const compressedFile = await imageCompression(matchingFile, options)
+                  const fileName = `${Date.now()}-${generateSlug(title)}.jpg`
+                  
+                  setProgress(prev => ({ ...prev, message: `Mengunggah foto '${expectedImageName}'...` }))
+                  const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('products') // Asumsi bucket bernama products
+                    .upload(fileName, compressedFile)
+                    
+                  if (uploadError) {
+                     addLog('error', `Baris ${rowIndex}: Gagal upload foto - ${uploadError.message}`)
+                  } else {
+                     const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(fileName)
+                     publicImageUrl = publicUrl
+                  }
+               } catch (err: any) {
+                  addLog('error', `Baris ${rowIndex}: Error saat mengolah foto - ${err.message}`)
+               }
+           } else {
+               addLog('info', `Baris ${rowIndex}: File foto '${expectedImageName}' tidak ditemukan dalam unggahan Anda.`)
+           }
         }
 
         // 4. Insert into database

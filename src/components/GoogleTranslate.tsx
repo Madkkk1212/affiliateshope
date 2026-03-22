@@ -25,34 +25,7 @@ export default function GoogleTranslate() {
       );
     };
 
-    // 2. Logika Auto-Detection (Hanya berjalan jika belum pernah memilih bahasa)
-    const autoDetectLanguage = () => {
-      const getCookie = (name: string) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop()?.split(';').shift();
-        return null;
-      };
-
-      // Jika cookie googtrans belum ada, kita deteksi bahasa browser
-      if (!getCookie('googtrans')) {
-        const browserLang = navigator.language.split('-')[0]; // Ambil kode utama (misal 'en' dari 'en-US')
-        const supported = ['en', 'ms', 'zh', 'ja', 'ar', 'es'];
-        
-        if (supported.includes(browserLang) && browserLang !== 'id') {
-          // Set cookie agar Google Translate otomatis aktif
-          // Format: /bahasa_asli/bahasa_tujuan
-          const targetLang = browserLang === 'zh' ? 'zh-CN' : browserLang;
-          document.cookie = `googtrans=/id/${targetLang}; path=/`;
-          document.cookie = `googtrans=/id/${targetLang}; path=/; domain=${window.location.hostname}`;
-          
-          // Refresh ringan jika diperlukan agar widget membaca cookie baru
-          // Namun biasanya inisialisasi script di bawah sudah cukup.
-        }
-      }
-    };
-
-    autoDetectLanguage();
+    // 2. Auto-Detection Removed per user request
 
     // 3. Tambahkan script Google Translate
     const addScript = () => {
@@ -105,40 +78,6 @@ export default function GoogleTranslate() {
         <ChevronDown size={12} className="text-gray-400 group-hover:text-primary transition-colors" />
       </div>
 
-      <style jsx global>{`
-        .premium-translate-element {
-          height: 16px;
-          overflow: hidden;
-        }
-        .goog-te-gadget-simple {
-          background-color: transparent !important;
-          border: none !important;
-          padding: 0 !important;
-          font-family: inherit !important;
-          display: flex !important;
-          align-items: center !important;
-        }
-        .goog-te-gadget-simple span {
-          color: #374151 !important;
-          font-weight: 600 !important;
-          font-size: 11px !important;
-        }
-        .goog-te-gadget-icon {
-          display: none !important;
-        }
-        .goog-te-menu-value img {
-          display: none !important;
-        }
-        .goog-te-menu-value span:nth-child(3) {
-          display: none !important;
-        }
-        .goog-te-menu-value span:nth-child(5) {
-          display: none !important;
-        }
-        @media (max-width: 640px) {
-          .premium-translate-element { width: 40px; }
-        }
-      `}</style>
     </div>
   )
 }

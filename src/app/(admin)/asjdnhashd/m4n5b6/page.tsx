@@ -28,7 +28,7 @@ export default async function StudioDashboard() {
           <h1 className="text-3xl font-black text-gray-900">Dashboard</h1>
           <p className="text-gray-500">Selamat datang kembali, Admin.</p>
         </div>
-        <Link href={`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/products/new`} className="btn-primary flex items-center gap-2 w-fit">
+        <Link href={`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/${process.env.NEXT_PUBLIC_PRODUCTS_PATH || 'p1o2i3'}/new`} className="btn-primary flex items-center gap-2 w-fit">
           <Plus size={20} />
           <span>Tambah Produk</span>
         </Link>
@@ -96,7 +96,7 @@ export default async function StudioDashboard() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <Link 
-                      href={`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/products/${product.id}/edit`} 
+                      href={`/${process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'}/${process.env.NEXT_PUBLIC_PRODUCTS_PATH || 'p1o2i3'}/${product.id}/edit`} 
                       className="inline-flex items-center gap-1 text-accent font-bold hover:text-primary transition-colors"
                     >
                       Edit <ArrowUpRight size={14} />

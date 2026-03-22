@@ -45,11 +45,11 @@ export async function POST(req: Request) {
         continue
       }
 
-      // Cek duplikasi berdasar Affiliate Link
+      // Cek duplikasi berdasar Affiliate Link (shopee_url)
       const { data: existing } = await supabase
         .from('products')
         .select('id')
-        .eq('affiliate_url', item.affiliate_link)
+        .eq('shopee_url', item.affiliate_link)
         .maybeSingle()
 
       if (existing) {
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       }
 
       // Format data untuk di-insert
-      const slug = slugify(item.title)
+      const slug = slugify(item.title) + '-' + Math.floor(Math.random() * 1000)
       const images = item.images && item.images.length > 0 ? item.images : []
       const mainImage = item.image || (images.length > 0 ? images[0] : null)
       

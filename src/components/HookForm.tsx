@@ -31,12 +31,17 @@ export default function HookForm({ initialData, categories }: HookFormProps) {
       visual_config: initialData?.visual_config || {},
       popup: initialData?.hook_popups?.[0] || {
         is_active: true,
+        show_once: true,
         title: '',
         description: '',
         cta_text: 'Lihat Detail',
-        trigger_type: 'delay',
-        trigger_value: 5,
+        trigger_type: 'immediate',
+        trigger_value: 0,
         images: initialData?.hook_popups?.[0]?.popup_images?.map((img: any) => img.image_url) || []
+      },
+      popup_extra: {
+        auto_close: initialData?.visual_config?.popup_settings?.auto_close || false,
+        auto_close_time: initialData?.visual_config?.popup_settings?.auto_close_time || 5
       }
     })
   
@@ -85,7 +90,19 @@ export default function HookForm({ initialData, categories }: HookFormProps) {
 
     setLoading(true)
     try {
-      const res = await saveHook(formData, initialData?.id)
+      const finalData = {
+        ...formData,
+        visual_config: {
+          ...(formData.visual_config || {}),
+          popup_settings: {
+            ...formData.popup_extra
+          }
+        }
+      }
+      // Remove popup_extra to avoid passing unhandled columns to server action
+      delete (finalData as any).popup_extra
+
+      const res = await saveHook(finalData, initialData?.id)
       if (res.success) {
         toast.success('Hook berhasil disimpan!')
         const adminSecret = process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'
@@ -271,14 +288,27 @@ export default function HookForm({ initialData, categories }: HookFormProps) {
             <div className="bg-white rounded-3xl shadow-premium border border-gray-100 p-8">
               <h2 className="text-xl font-black text-gray-900 mb-6 flex items-center justify-between">
                 <span>Popup Settings</span>
-                <div className="flex items-center gap-2">
-                  <input 
-                    type="checkbox" 
-                    checked={formData.popup.is_active}
-                    onChange={e => setFormData(prev => ({ ...prev, popup: { ...prev.popup, is_active: e.target.checked } }))}
-                    className="w-5 h-5 accent-primary"
-                  />
-                  <span className="text-xs font-bold text-gray-500 uppercase">Aktifkan</span>
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="checkbox" 
+                      id="show_once"
+                      checked={formData.popup.show_once !== false}
+                      onChange={e => setFormData(prev => ({ ...prev, popup: { ...prev.popup, show_once: e.target.checked } }))}
+                      className="w-5 h-5 accent-primary cursor-pointer"
+                    />
+                    <label htmlFor="show_once" className="text-xs font-bold text-gray-500 uppercase cursor-pointer">Tampil Sekali</label>
+                  </div>
+                  <div className="flex items-center gap-2 pl-6 border-l border-gray-100">
+                    <input 
+                      type="checkbox" 
+                      id="is_active"
+                      checked={formData.popup.is_active}
+                      onChange={e => setFormData(prev => ({ ...prev, popup: { ...prev.popup, is_active: e.target.checked } }))}
+                      className="w-5 h-5 accent-primary cursor-pointer"
+                    />
+                    <label htmlFor="is_active" className="text-xs font-bold text-gray-500 uppercase cursor-pointer">Aktifkan</label>
+                  </div>
                 </div>
               </h2>
               
@@ -321,9 +351,10 @@ export default function HookForm({ initialData, categories }: HookFormProps) {
                         onChange={e => setFormData(prev => ({ ...prev, popup: { ...prev.popup, trigger_type: e.target.value } }))}
                         className="w-full px-4 py-4 rounded-2xl border border-gray-100 bg-gray-50 text-sm outline-none"
                       >
-                        <option value="click">Klik (Count)</option>
-                        <option value="scroll">Scroll (%)</option>
-                        <option value="delay">Delay (S)</option>
+                        <option value="immediate">Muncul Langsung (0s)</option>
+                        <option value="delay">Delay (Detik)</option>
+                        <option value="click">Berdasarkan Klik (Count)</option>
+                        <option value="scroll">Berdasarkan Scroll (%)</option>
                       </select>
                     </div>
                     <div className="space-y-2">
@@ -337,6 +368,33 @@ export default function HookForm({ initialData, categories }: HookFormProps) {
                     </div>
                   </div>
                 </div>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-6 mt-6 pt-6 border-t border-gray-50">
+                <div className="flex items-center gap-3 h-full pt-6">
+                  <input 
+                    type="checkbox" 
+                    id="auto_close"
+                    checked={formData.popup_extra.auto_close}
+                    onChange={e => setFormData(prev => ({ ...prev, popup_extra: { ...prev.popup_extra, auto_close: e.target.checked } }))}
+                    className="w-5 h-5 accent-primary cursor-pointer"
+                  />
+                  <label htmlFor="auto_close" className="text-sm font-bold text-gray-700 cursor-pointer">
+                    Auto-Close Popup
+                  </label>
+                </div>
+                {formData.popup_extra.auto_close && (
+                  <div className="space-y-2 translate-y-2">
+                    <label className="text-sm font-bold text-gray-700">Waktu Hitung Mundur (Detik)</label>
+                    <input 
+                      type="number" 
+                      min="1"
+                      value={formData.popup_extra.auto_close_time}
+                      onChange={e => setFormData(prev => ({ ...prev, popup_extra: { ...prev.popup_extra, auto_close_time: parseInt(e.target.value) || 5 } }))}
+                      className="w-full px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50 outline-none text-sm"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

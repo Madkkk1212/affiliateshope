@@ -82,7 +82,7 @@ export const CATEGORY_GROUPS = [
     categories: [
       'Serum Wajah', 'Pelembab (Moisturizer)', 'Sunscreen', 'Eye Cream', 'Masker Wajah',
       'Foundation', 'Cushion', 'Bedak', 'Lipstick & Lip Cream', 'Eyebrow & Eyeliner',
-      'Parfum EDP', 'Body Mist', 'Eksfoliasi Tubuh', 'Perawatan Kuku (Manicure)'
+      'Parfum EDP', 'Body Mist', 'Parfum Cewe', 'Parfum Cowo', 'Eksfoliasi Tubuh', 'Perawatan Kuku (Manicure)'
     ]
   },
   {

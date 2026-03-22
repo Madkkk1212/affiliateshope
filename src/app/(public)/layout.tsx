@@ -1,4 +1,5 @@
 import Navbar from '@/components/Navbar'
+import { Suspense } from 'react'
 
 export default function PublicLayout({
   children,
@@ -7,7 +8,9 @@ export default function PublicLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Suspense fallback={<div className="h-16 w-full bg-white border-b border-gray-100 z-50"></div>}>
+        <Navbar />
+      </Suspense>
       <main className="flex-grow">
         {children}
       </main>

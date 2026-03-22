@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Pagination from '@/components/Pagination'
 import CategoryNav from '@/components/CategoryNav'
 import HeroSearch from '@/components/HeroSearch'
+import { Suspense } from 'react'
 
 export const revalidate = 3600 // Cache for 1 hour
 
@@ -81,14 +82,16 @@ export default async function HomePage({
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start mb-16">
           {/* Sidebar (Desktop Only) */}
           <div className="hidden lg:block w-full lg:w-[280px] xl:w-[320px] shrink-0 lg:sticky lg:top-28 z-10 transition-all duration-500">
-            <CategoryNav 
-              uniqueCategories={uniqueCategories}
-              categoryCounts={categoryCounts}
-              categoryImages={categoryImages}
-              totalActive={totalActive}
-              currentCategory={category}
-              currentSort={sort}
-            />
+            <Suspense fallback={<div className="h-96 w-full bg-white/40 backdrop-blur-xl border border-white/60 shadow-xl rounded-[2rem] animate-pulse"></div>}>
+              <CategoryNav 
+                uniqueCategories={uniqueCategories}
+                categoryCounts={categoryCounts}
+                categoryImages={categoryImages}
+                totalActive={totalActive}
+                currentCategory={category}
+                currentSort={sort}
+              />
+            </Suspense>
           </div>
 
           {/* Main Content */}
@@ -189,14 +192,16 @@ export default async function HomePage({
 
             {/* Mobile Sidebar (CategoryNav) */}
             <div className="block lg:hidden w-full shrink-0 z-10 transition-all duration-500 mb-8 sm:mb-12">
-              <CategoryNav 
-                uniqueCategories={uniqueCategories}
-                categoryCounts={categoryCounts}
-                categoryImages={categoryImages}
-                totalActive={totalActive}
-                currentCategory={category}
-                currentSort={sort}
-              />
+              <Suspense fallback={<div className="h-24 w-full bg-white/40 backdrop-blur-xl border border-white/60 shadow-sm rounded-2xl animate-pulse"></div>}>
+                <CategoryNav 
+                  uniqueCategories={uniqueCategories}
+                  categoryCounts={categoryCounts}
+                  categoryImages={categoryImages}
+                  totalActive={totalActive}
+                  currentCategory={category}
+                  currentSort={sort}
+                />
+              </Suspense>
             </div>
 
             {/* Product Grid */}
@@ -208,11 +213,13 @@ export default async function HomePage({
                   ))}
                 </div>
                 
-                <Pagination 
-                  currentPage={page} 
-                  totalCount={count || 0} 
-                  pageSize={pageSize} 
-                />
+                <Suspense fallback={<div className="h-12 w-full flex items-center justify-center gap-2 animate-pulse mt-8"><div className="w-8 h-8 rounded-lg bg-gray-200"></div></div>}>
+                  <Pagination 
+                    currentPage={page} 
+                    totalCount={count || 0} 
+                    pageSize={pageSize} 
+                  />
+                </Suspense>
               </>
             ) : (
               <div className="text-center py-24 bg-white rounded-[2rem] border border-gray-100 shadow-soft w-full">

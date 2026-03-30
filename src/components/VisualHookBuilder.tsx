@@ -95,9 +95,9 @@ export default function VisualHookBuilder({ products, initialConfig, onSave }: V
     
     if (missingProducts.length > 0) {
       const maxY = Math.max(0, ...(currentLayout as any[]).map(l => l.y + l.h))
-      const colLimit = device === 'mobile' ? 4 : device === 'tablet' ? 10 : 12
-      const userCols = config.columns || 3
-      const colWidth = Math.floor(colLimit / userCols)
+      const colLimit = device === 'mobile' ? 2 : device === 'tablet' ? 10 : 12
+      const userCols = device === 'mobile' ? 2 : (config.columns || 3)
+      const colWidth = Math.floor(colLimit / userCols) || 1
 
       const newItems = missingProducts.map((p, idx) => ({
         i: p.id,
@@ -115,9 +115,9 @@ export default function VisualHookBuilder({ products, initialConfig, onSave }: V
   }, [products, device])
 
   const resetLayout = (cols: number) => {
-    const colLimit = device === 'mobile' ? 4 : device === 'tablet' ? 10 : 12
+    const colLimit = device === 'mobile' ? 2 : device === 'tablet' ? 10 : 12
     const currentBreakpoint = device === 'mobile' ? 'xs' : device === 'tablet' ? 'md' : 'lg'
-    const colWidth = Math.floor(colLimit / cols)
+    const colWidth = Math.max(1, Math.floor(colLimit / cols))
     
     const newItems = products.map((p, i) => ({
       i: p.id,
@@ -211,7 +211,7 @@ export default function VisualHookBuilder({ products, initialConfig, onSave }: V
               width: width,
               layouts: layouts,
               breakpoints: { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 },
-              cols: { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 },
+              cols: { lg: 12, md: 10, sm: 6, xs: 2, xxs: 2 },
               rowHeight: device === 'mobile' ? 45 : 60,
               onLayoutChange: handleLayoutChange,
               isDraggable: viewMode === 'edit',
@@ -369,7 +369,7 @@ export default function VisualHookBuilder({ products, initialConfig, onSave }: V
                     <input 
                       type="range" 
                       min="1" 
-                      max={device === 'mobile' ? 4 : 5} 
+                      max={device === 'mobile' ? 2 : 5} 
                       value={config.columns}
                       onChange={(e) => {
                         const newCols = parseInt(e.target.value)

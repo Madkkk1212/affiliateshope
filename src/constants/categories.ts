@@ -71,7 +71,7 @@ export const CATEGORY_GROUPS = [
     categories: [
       'Air Fryer', 'Blender & Juicer', 'Rice Cooker', 'Microwave', 'Oven Listrik',
       'Kompor Gas', 'Kompor Induksi', 'Wajan & Panci', 'Spatula & Alat Masak',
-      'Piring & Gelas', 'Kotak Makan (Tumblr)', 'Botol Minum',
+      'Piring & Gelas', 'Kotak Makan (Tumbler)', 'Botol Minum', 'Tumbler',
       'Sprei & Bedcover', 'Bantal & Guling', 'Selimut', 'Kasur & Matras',
       'Lampu Hias', 'Lampu Tidur', 'Jam Dinding', 'Gorden & Tirai',
       'Vacuum Cleaner', 'Sapu & Pel', 'Tempat Sampah', 'Rak Penyimpanan'

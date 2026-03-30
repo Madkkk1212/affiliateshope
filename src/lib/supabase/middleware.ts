@@ -34,19 +34,20 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
   // Hidden Admin Path Protection
   const adminPath = process.env.NEXT_PUBLIC_ADMIN_PATH || 'asjdnhashd'
+  const isAdminPath = request.nextUrl.pathname.startsWith(`/${adminPath}`)
   
   // Block legacy /studio path
   if (request.nextUrl.pathname.startsWith('/studio')) {
     return NextResponse.rewrite(new URL('/not-found', request.url))
   }
 
-  if (request.nextUrl.pathname.startsWith(`/${adminPath}`)) {
+  if (isAdminPath) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
     const loginSecret = process.env.NEXT_PUBLIC_LOGIN_PATH || 'y7z2k9'
     const dashboardSecret = process.env.NEXT_PUBLIC_DASHBOARD_PATH || 'm4n5b6'
     

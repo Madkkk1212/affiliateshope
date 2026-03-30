@@ -78,6 +78,7 @@ export default async function HookListPage({
                 <th className="px-6 py-4">Hook Info</th>
                 <th className="px-6 py-4">Category</th>
                 <th className="px-6 py-4 text-center">Products</th>
+                <th className="px-6 py-4 text-center">Traffic</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Created At</th>
                 <th className="px-6 py-4 text-right">Actions</th>
@@ -97,6 +98,12 @@ export default async function HookListPage({
                     <span className="font-black text-primary bg-primary/5 px-3 py-1 rounded-full">
                       {hook.hook_products?.[0]?.count || 0}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex items-center justify-center gap-1.5 font-bold text-gray-900 bg-gray-50 px-3 py-1 rounded-full w-fit mx-auto">
+                      <Eye size={14} className="text-gray-400" />
+                      <span>{hook.views || 0}</span>
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase ${
@@ -119,7 +126,7 @@ export default async function HookListPage({
               ))}
               {hooks?.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-400 font-medium">
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-400 font-medium">
                     Belum ada hook. Tekan "Hook Baru" untuk memulai.
                   </td>
                 </tr>

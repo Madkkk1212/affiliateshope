@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTransition, useEffect } from 'react'
+import Image from 'next/image'
 import { LayoutGrid } from 'lucide-react'
 import GoogleTranslate from './GoogleTranslate'
 import HeroSearch from './HeroSearch'
@@ -45,11 +46,16 @@ export default function Navbar() {
           onClick={handleHomeClick} 
           className="group flex items-center gap-2 sm:gap-3 outline-none shrink-0"
         >
-          <img 
-            src="/logo.png" 
-            alt="Logo" 
-            className={`h-10 sm:h-12 w-auto object-contain transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${isPending ? 'scale-95 opacity-50 blur-[2px] animate-pulse' : 'group-hover:scale-105 group-active:scale-95'}`}
-          />
+          <div className="relative h-10 w-10 sm:h-12 sm:w-12">
+            <Image 
+              src="/logo.png" 
+              alt="Logo" 
+              fill
+              className={`object-contain transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${isPending ? 'scale-95 opacity-50 blur-[2px] animate-pulse' : 'group-hover:scale-105 group-active:scale-95'}`}
+              priority
+              sizes="(max-width: 640px) 40px, 48px"
+            />
+          </div>
           <div className={`flex flex-col transition-all duration-500 ease-out ${isPending ? 'opacity-50 blur-[1px]' : 'group-hover:opacity-90'}`}>
             <span className="text-base sm:text-lg font-black tracking-tight leading-none text-gray-900">
               Lumahive

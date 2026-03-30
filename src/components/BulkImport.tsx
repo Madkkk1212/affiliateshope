@@ -110,6 +110,19 @@ export default function BulkImport({ onClose, onSuccess }: BulkImportProps) {
           continue
         }
 
+        // Check for existing product to avoid duplicates
+        const { data: existingProduct } = await supabase
+          .from('products')
+          .select('id')
+          .eq('shopee_url', affiliate_url)
+          .maybeSingle()
+
+        if (existingProduct) {
+          addLog('info', `Baris ${rowIndex}: Dilewati - Produk dengan link Shopee ini sudah ada.`)
+          successCount++ // Count as success to trigger refresh if needed, or we can use a separate count
+          continue
+        }
+
         let publicImageUrl = null
         let finalDiscountPrice: string | null = null
         let scraperData: any = null
@@ -225,11 +238,12 @@ export default function BulkImport({ onClose, onSuccess }: BulkImportProps) {
         setTimeout(() => {
           onSuccess()
         }, 3000)
+      } else {
+        setLoading(false)
       }
 
     } catch (err: any) {
       addLog('error', `Terjadi kesalahan internal: ${err.message}`)
-    } finally {
       setLoading(false)
     }
   }

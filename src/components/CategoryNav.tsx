@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTransition, useState, useEffect } from 'react'
 import { TrendingUp, Loader2, Search, LayoutGrid, X } from 'lucide-react'
+import Image from 'next/image'
 
 interface CategoryNavProps {
   uniqueCategories: string[];
@@ -183,9 +184,9 @@ export default function CategoryNav({
                    onClick={() => handleCategoryClick(cat)}
                    className={`flex flex-col items-center gap-1.5 transition-all ${optimisticCategory === cat ? 'scale-105 filter drop-shadow-md' : 'opacity-90 hover:opacity-100'}`}
                  >
-                   <div className={`w-full aspect-square rounded-2xl overflow-hidden shadow-sm border-[3px] ${optimisticCategory === cat ? 'border-orange-500' : 'border-transparent bg-white'}`}>
+                   <div className={`w-full aspect-square rounded-2xl overflow-hidden shadow-sm border-[3px] relative ${optimisticCategory === cat ? 'border-orange-500' : 'border-transparent bg-white'}`}>
                      {categoryImages?.[cat] ? (
-                       <img src={categoryImages[cat]} alt={cat} className="w-full h-full object-cover" />
+                       <Image src={categoryImages[cat]} alt={cat} fill className="object-cover" sizes="25vw" />
                      ) : (
                        <div className="w-full h-full bg-orange-50 flex items-center justify-center text-orange-400">
                          <LayoutGrid size={24} />
@@ -270,9 +271,9 @@ export default function CategoryNav({
                    onClick={() => { handleCategoryClick(cat); setShowMobileMore(false); }}
                    className={`flex flex-col items-center gap-2 ${optimisticCategory === cat ? 'opacity-100 scale-105 filter drop-shadow-md' : 'opacity-80 hover:opacity-100'}`}
                  >
-                   <div className={`w-full aspect-square rounded-2xl overflow-hidden shadow-sm border-[3px] bg-gray-50 ${optimisticCategory === cat ? 'border-orange-500' : 'border-transparent'}`}>
+                   <div className={`w-full aspect-square rounded-2xl overflow-hidden shadow-sm border-[3px] bg-gray-50 relative ${optimisticCategory === cat ? 'border-orange-500' : 'border-transparent'}`}>
                      {categoryImages?.[cat] ? (
-                       <img src={categoryImages[cat]} alt={cat} className="w-full h-full object-cover" />
+                       <Image src={categoryImages[cat]} alt={cat} fill className="object-cover" sizes="25vw" />
                      ) : (
                        <div className="w-full h-full flex items-center justify-center text-gray-300">
                          <LayoutGrid size={24} />

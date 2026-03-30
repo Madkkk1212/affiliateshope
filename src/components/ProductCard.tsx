@@ -8,9 +8,10 @@ import { formatPrice } from '@/lib/utils'
 
 interface ProductCardProps {
   product: Product
+  priority?: boolean
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, priority = false }: ProductCardProps) {
   const handleTrackClick = (e: React.MouseEvent) => {
     // Gunakan keepalive agar request tetap berjalan meskipun navigasi dimulai
     fetch('/api/click', {
@@ -38,7 +39,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-1000 ease-out"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-            priority={false}
+            priority={priority}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-200">

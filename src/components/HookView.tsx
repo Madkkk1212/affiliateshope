@@ -58,6 +58,25 @@ export default function HookView({ hook }: HookViewProps) {
     return () => observer.disconnect()
   }, [])
 
+  // Track Hook Visit
+  useEffect(() => {
+    const trackVisit = async () => {
+      if (!hook?.id) return;
+      
+      try {
+        await fetch('/api/hook-click', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hookId: hook.id })
+        });
+      } catch (error) {
+        console.error('Failed to track hook view:', error);
+      }
+    };
+
+    trackVisit();
+  }, [hook?.id]);
+
   const { visual_config } = hook
   const hasVisualLayout = visual_config?.layouts || (visual_config?.layout && visual_config.layout.length > 0)
   const settings = visual_config?.settings || {}
@@ -76,7 +95,7 @@ export default function HookView({ hook }: HookViewProps) {
   const normalizedLayouts = useMemo(() => {
     if (!hasVisualLayout) return {}
     
-    const breakpoints = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }
+    const breakpoints = { lg: 12, md: 10, sm: 6, xs: 2, xxs: 2 }
     const result: any = {}
     
     Object.entries(breakpoints).forEach(([bp, cols]) => {
@@ -85,7 +104,7 @@ export default function HookView({ hook }: HookViewProps) {
       const missingProducts = sortedProducts.filter((p: any) => !existingIds.has(p.id))
       
       const maxY = Math.max(0, ...baseLayout.map((l: any) => (l.y || 0) + (l.h || 0)))
-      const currentCols = settings.columns || 3
+      const currentCols = bp === 'xs' ? 2 : (settings.columns || 3)
       const colWidth = Math.floor(cols / currentCols) || 1
       
       const newItems = missingProducts.map((p: any, idx: number) => ({
@@ -197,11 +216,11 @@ export default function HookView({ hook }: HookViewProps) {
                 width={width}
                 layouts={normalizedLayouts}
                 breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-                cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+                cols={{ lg: 12, md: 10, sm: 6, xs: 2, xxs: 2 }}
                 rowHeight={width < 640 ? 45 : 60}
                 margin={[
-                  width < 640 ? Math.max(settings.gap || 16, 16) : (settings.gap || 24), 
-                  width < 640 ? Math.max(settings.gap || 16, 16) : (settings.gap || 24)
+                  width < 640 ? 10 : (settings.gap || 24), 
+                  width < 640 ? 10 : (settings.gap || 24)
                 ]}
               >
                 {sortedProducts.map((product: any) => {
@@ -316,9 +335,8 @@ export default function HookView({ hook }: HookViewProps) {
           )}
         </div>
 
-        {/* Dedicated Mobile Layout (Strict 2-Column Grid) (< sm) */}
-        <div className="block sm:hidden px-3 pb-20 relative z-10">
-          <div className="grid grid-cols-2 gap-2.5">
+        <div className="block sm:hidden px-2 pb-20 relative z-10">
+          <div className="grid grid-cols-2 gap-2">
             {sortedProducts.map((product: any, idx: number) => {
               const cardStyle = overrides[product.id] || {}
               return (
@@ -341,8 +359,8 @@ export default function HookView({ hook }: HookViewProps) {
                       </div>
                     )}
                     {/* Top Center Badge (Like Screenshot) */}
-                    <div className="absolute top-0 inset-x-0 flex justify-center">
-                      <div className="bg-white px-3 py-1 rounded-b-xl shadow-sm text-[9px] font-black uppercase tracking-widest text-[#ff4d00]" style={{ color: cardStyle.buttonColor || settings.buttonColor || '#ff4d00' }}>
+                    <div className="absolute top-0 inset-x-0 flex justify-center z-10">
+                      <div className="bg-white/95 backdrop-blur-sm px-3 py-1 rounded-b-xl shadow-sm text-[9px] font-black uppercase tracking-widest" style={{ color: cardStyle.buttonColor || settings.buttonColor || '#ff4d00' }}>
                         BEST SELLER
                       </div>
                     </div>
@@ -357,12 +375,12 @@ export default function HookView({ hook }: HookViewProps) {
                         {cardStyle.title || product.title}
                       </h3>
                       
-                      <div className="flex flex-col mb-3">
-                        <span className="font-black text-[#ff4d00] tracking-tight text-sm leading-none" style={{ color: cardStyle.buttonColor || settings.buttonColor || '#ff4d00' }}>
+                      <div className="flex items-baseline gap-1.5 mb-2.5">
+                        <span className="font-black text-[#ff4d00] tracking-tight text-sm" style={{ color: cardStyle.buttonColor || settings.buttonColor || '#ff4d00' }}>
                           {formatPrice(product.discount_price || product.price)}
                         </span>
                         {product.discount_price && (
-                           <span className="text-[10px] text-gray-400 font-bold line-through mt-0.5">
+                           <span className="text-[10px] text-gray-300 font-bold line-through">
                              {formatPrice(product.price)}
                            </span>
                         )}

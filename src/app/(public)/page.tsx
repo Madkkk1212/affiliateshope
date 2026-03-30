@@ -4,10 +4,16 @@ import { Sparkles, TrendingUp, Filter, CheckCircle2, ShieldCheck, Star } from 'l
 import Link from 'next/link'
 import Pagination from '@/components/Pagination'
 import CategoryNav from '@/components/CategoryNav'
-import HeroSearch from '@/components/HeroSearch'
 import { Suspense } from 'react'
+import Image from 'next/image'
 
 export const revalidate = 3600 // Cache for 1 hour
+
+interface CategoryStat {
+  category_name: string
+  product_count: number
+  representative_image: string
+}
 
 export default async function HomePage({
   searchParams,
@@ -29,7 +35,7 @@ export default async function HomePage({
   }
 
   if (searchStr) {
-    // Memecah kata kunci berdasarkan spasi agar pencarian lebih fleksibel (misal: "makaroni pedas" mencari "makaroni" AND "pedas" di posisi mana saja)
+    // Memecah kata kunci berdasarkan spasi agar pencarian lebih fleksibel
     const keywords = searchStr.trim().split(/\s+/)
     keywords.forEach(keyword => {
       query = query.ilike('title', `%${keyword}%`)
@@ -44,37 +50,66 @@ export default async function HomePage({
 
   query = query.range((page - 1) * pageSize, page * pageSize - 1)
 
-  const { data: products, count } = await query
+  // Use the new RPC for optimized category stats fetching
+  let [productsRes, categoryStatsRes] = await Promise.all([
+    query,
+    supabase.rpc('get_category_stats')
+  ])
 
-  // Optimize category counting: only fetch what's needed
-  const { data: allActiveCategories } = await supabase
-    .from('products')
-    .select('category, image')
-    .eq('is_active', true)
+  let categoryStats: CategoryStat[] | null = categoryStatsRes.data
+
+  // FALLBACK: If RPC is missing (PGRST202), fetch categories the old way
+  if (categoryStatsRes.error && categoryStatsRes.error.code === 'PGRST202') {
+    const { data: fallbackData } = await supabase
+      .from('products')
+      .select('category, image')
+      .eq('is_active', true)
+    
+    if (fallbackData) {
+      const counts: Record<string, number> = {}
+      const images: Record<string, string> = {}
+      fallbackData.forEach(p => {
+        if (p.category) {
+          counts[p.category] = (counts[p.category] || 0) + 1
+          if (!images[p.category] && p.image) images[p.category] = p.image
+        }
+      })
+      categoryStats = Object.keys(counts).map(name => ({
+        category_name: name,
+        product_count: counts[name],
+        representative_image: images[name]
+      }))
+    }
+  }
+
+  const { data: products, count } = productsRes
 
   const categoryCounts: Record<string, number> = {}
   const categoryImages: Record<string, string> = {}
   
-  allActiveCategories?.forEach(p => {
-    if (p.category) {
-      categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1
-      if (!categoryImages[p.category] && p.image) {
-        categoryImages[p.category] = p.image
+  categoryStats?.forEach(stat => {
+    if (stat.category_name) {
+      categoryCounts[stat.category_name] = Number(stat.product_count)
+      if (stat.representative_image) {
+        categoryImages[stat.category_name] = stat.representative_image
       }
     }
   })
 
   const uniqueCategories = Object.keys(categoryCounts).sort()
-  const totalActive = allActiveCategories?.length || 0
+  const totalActive = categoryStats?.reduce((acc, curr) => acc + Number(curr.product_count), 0) || 0
 
   return (
     <div className="bg-hero-gradient min-h-screen relative">
       {/* Background Watermark */}
       <div className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center opacity-10 mix-blend-multiply overflow-hidden">
-        <img 
+        <Image 
           src="/logo.png" 
           alt="Luma Hive Watermark" 
+          width={1000}
+          height={1000}
           className="w-[120%] sm:w-[80%] max-w-[1000px] object-contain rotate-[-5deg] grayscale"
+          priority
         />
       </div>
 
@@ -155,34 +190,42 @@ export default async function HomePage({
                   <div className="grid grid-cols-2 grid-rows-2 gap-3 h-full w-full">
                     {/* Top Left: Tech / Keyboard */}
                     <div className="rounded-2xl overflow-hidden bg-gray-900 group relative shadow-inner">
-                      <img 
+                      <Image 
                         src="https://images.unsplash.com/photo-1595225476474-87563907a212?q=80&w=800&auto=format&fit=crop" 
                         alt="Tech" 
-                        className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110 opacity-90 group-hover:opacity-100" 
+                        fill
+                        className="object-cover transition-transform duration-[2000ms] group-hover:scale-110 opacity-90 group-hover:opacity-100" 
+                        sizes="(max-width: 1024px) 50vw, 25vw"
                       />
                     </div>
                     {/* Top Right: Shoes */}
                     <div className="rounded-2xl overflow-hidden bg-gray-100 group relative shadow-inner">
-                      <img 
+                      <Image 
                         src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=800&auto=format&fit=crop" 
                         alt="Shoes" 
-                        className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" 
+                        fill
+                        className="object-cover transition-transform duration-[2000ms] group-hover:scale-110" 
+                        sizes="(max-width: 1024px) 50vw, 25vw"
                       />
                     </div>
                     {/* Bottom Left: Perfume */}
                     <div className="rounded-2xl overflow-hidden bg-gray-100 group relative shadow-inner">
-                      <img 
+                      <Image 
                         src="https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=800&auto=format&fit=crop" 
                         alt="Perfume" 
-                        className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" 
+                        fill
+                        className="object-cover transition-transform duration-[2000ms] group-hover:scale-110" 
+                        sizes="(max-width: 1024px) 50vw, 25vw"
                       />
                     </div>
                     {/* Bottom Right: EDC */}
                     <div className="rounded-2xl overflow-hidden bg-gray-100 group relative shadow-inner">
-                      <img 
+                      <Image 
                         src="https://images.unsplash.com/photo-1585336261022-680e295ce3fe?q=80&w=800&auto=format&fit=crop" 
                         alt="Accessories" 
-                        className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110" 
+                        fill
+                        className="object-cover transition-transform duration-[2000ms] group-hover:scale-110" 
+                        sizes="(max-width: 1024px) 50vw, 25vw"
                       />
                     </div>
                   </div>
@@ -208,8 +251,8 @@ export default async function HomePage({
             {products && products.length > 0 ? (
               <>
                 <div id="product-grid" key={category || 'all'} className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-8 mb-16 animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out fill-mode-both">
-                  {products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                  {products.map((product, index) => (
+                    <ProductCard key={product.id} product={product} priority={index < 4} />
                   ))}
                 </div>
                 

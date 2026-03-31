@@ -10,6 +10,9 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   metadataBase: new URL("http://rekomendasi-luma.my.id"),
+  verification: {
+    google: "eI7my6hgeJyYWjjH4LDmEn1eu-O--cL8DNCG5dilY_w",
+  },
   title: {
     default: "Lumahive: Rekomendasi Shopee & Racun Shopee Terbaik 2026",
     template: "%s | Racun Shopee Lumahive",

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { ShoppingBag, Star, ExternalLink, CheckCircle2 } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
 import HookPopup from '@/components/HookPopup'
@@ -162,10 +163,13 @@ export default function HookView({ hook }: HookViewProps) {
     >
       {/* Background Watermark */}
       <div className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center opacity-10 mix-blend-multiply overflow-hidden">
-        <img 
+        <Image 
           src="/logo.png" 
           alt="Luma Hive Watermark" 
+          width={1000}
+          height={1000}
           className="w-[120%] sm:w-[80%] max-w-[1000px] object-contain rotate-[-5deg] grayscale"
+          priority
         />
       </div>
       {/* The Landing Popup (Hook Info as Popup with Product Collage) */}
@@ -237,10 +241,12 @@ export default function HookView({ hook }: HookViewProps) {
                       }}
                     >
                       <Link href={product.affiliate_url} target="_blank" className="flex-grow overflow-hidden relative block group-hover:opacity-95 transition-opacity">
-                        <img 
+                        <Image 
                           src={product.image} 
-                          alt={product.title} 
+                          alt={`Racun Shopee: ${product.title} - Koleksi ${hook.title}`} 
+                          fill
                           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" 
+                          sizes="(max-width: 768px) 50vw, 33vw"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                       </Link>
@@ -287,7 +293,13 @@ export default function HookView({ hook }: HookViewProps) {
                       {/* Product Image */}
                       <Link href={product.affiliate_url} target="_blank" className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-gray-50 flex-shrink-0 relative block">
                         {product.image ? (
-                          <img src={product.image} alt={product.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
+                          <Image 
+                            src={product.image} 
+                            alt={`Spill Produk: ${product.title} dari ${hook.title}`} 
+                            fill
+                            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" 
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-300">
                             <ShoppingBag size={48} />
@@ -352,7 +364,14 @@ export default function HookView({ hook }: HookViewProps) {
                 >
                   <Link href={product.affiliate_url} target="_blank" className="w-full aspect-[4/5] overflow-hidden bg-gray-50 flex-shrink-0 relative block">
                     {product.image ? (
-                      <img src={product.image} alt={product.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                      <Image 
+                        src={product.image} 
+                        alt={`Rekomendasi Shopee: ${product.title} - ${hook.title} Viral`} 
+                        fill
+                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+                        sizes="50vw"
+                        priority={idx < 4}
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300">
                         <ShoppingBag size={24} />
